@@ -42,3 +42,5 @@ def GetLinkerSeqs():
 
 def GetStability_SS(seq):
     test1 test2
+    this is bullshit
+    
