@@ -39,9 +39,3 @@ def GetLinkerSeqs():
     "link_4" : "UAAGGCACGCGGUGAAUGCCAA",
     "link_5" : "UGAGGUAGUAGGUUGUAUAGUU",
 	}
-
-def GetStability_SS(seq):
-    test1 test2
- 
-    
-
