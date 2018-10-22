@@ -1,7 +1,8 @@
 ####### This script has all the parameters and helper functions that the rest of the library generation will use i think it will wor not sure
 
 
-
+import RNA
+import subprocess
 
 
 
@@ -39,3 +40,9 @@ def GetLinkerSeqs():
     "link_4" : "UAAGGCACGCGGUGAAUGCCAA",
     "link_5" : "UGAGGUAGUAGGUUGUAUAGUU",
 	}
+
+def GetdG_dotbracket(seq):
+    output_ = subprocess.check_output('echo \'' + seq +'\' | RNAfold -d 0', shell=True)
+    dG = float(output_[1].split(' (')[1].split(')')[0])
+    dotbracket = output_[1].split(' (')[0]
+    return dG, dotbracket
