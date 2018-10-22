@@ -46,7 +46,7 @@ def GetLinkerSeqs():
 	}
 
 def GetdG_dotbracket(seq):
-    output_ = subprocess.check_output('echo \'' + seq +'\' | RNAfold -d 0', shell=True)
+    output_ = subprocess.check_output('echo \'' + seq +'\' | RNAfold -d 0', shell=True).split('\n')
     dG = float(output_[1].split(' (')[1].split(')')[0])
     dotbracket = output_[1].split(' (')[0]
     return dG, dotbracket
@@ -56,25 +56,32 @@ def Get_MS2():
     return MS2_seq
 
 def GenerateRandomScaffAndLinker():
-    per_AU_scaff = 0.6
+    per_AU_scaff = 0.65
     per_AU_linker = 0.85 
     len_scaff = 10
     len_linker = 3
-    numhits = 0
-    seed(1)
-    while numhits <10 :
-
-    
-
-    # simulate sequence
-
-
-
-
-
-abcd = dict( A=3, U=3, C=2, G=2 )
-  # keys can be any immutables: 2d points, colors, atoms ...
-wrand = Walkerrandom( abcd.values(), abcd.keys() )
-wrand.random()
-
+    Scaffprob = dict( A=per_AU_scaff/2, U=per_AU_scaff/2, C=(1-per_AU_scaff)/2, G=(1-per_AU_scaff)/2 )
+    srand = Walkerrandom( Scaffprob.values(), Scaffprob.keys() )
+    Linkprob = dict( A=per_AU_linker/2, U=per_AU_linker/2, C=(1-per_AU_linker)/2, G=(1-per_AU_linker)/2 )
+    lrand = Walkerrandom( Linkprob.values(), Linkprob.keys())
+    numhits = 10
+    def makeSeqwProb(l,wrand):
+        s = ''
+        for i in range(0,l):
+            s = s + wrand.random()
+        return s
+    seqs_final = defaultdict()
+    while numhits < 10:
+        l1 = makeSeqwProb(len_linker, lrand)
+        l2 = makeSeqwProb(len_linker, lrand)
+        l3 = makeSeqwProb(len_linker, lrand)
+        l4 = makeSeqwProb(len_linker, lrand)
+        s1 = makeSeqwProb(len_scaff, srand)
+        s2 = makeSeqwProb(len_scaff, srand)
+        seq_final =  l1+s1 + l2 + l3 + s2 + l4 
+        dG, dotbracket = GetdG_dotbracket(seq_final)
+        if (dG > -0.1) and ('(' not in dotbracket):
+            print(seq_final)
+            print(dG, dotbracket)
+            numhits = numhits + 1
 
