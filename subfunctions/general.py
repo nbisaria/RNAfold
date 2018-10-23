@@ -11,7 +11,7 @@ from collections import defaultdict
 
 
 def GetMotifstoFilter():
-    splicesites = ['AAUAA']
+    splicesites = ['AAUAA','GGUAAGU']
     seqs = splicesites
     return seqs
 
