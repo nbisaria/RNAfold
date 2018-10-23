@@ -5,14 +5,15 @@ import RNA
 import subprocess
 from random import random
 from walkerrandom import Walkerrandom
+from collections import defaultdict
 
 
 
 
-
-
-
-
+def GetMotifstoFilter():
+    splicesites = ['AAUAA']
+    seqs = splicesites
+    return seqs
 
 class Parameters():
     def __init__(self, concentrations=None):
@@ -22,28 +23,6 @@ class Parameters():
         self.max_deltaG = -3
         self.tempK = 310
 
-def GetScaffoldSeqs():
-
-    #scaffold sequences need to x nt in length with certain amount/varying amount of AU content and stability
-    #two sequences are the 5' and 3' sequences that will be threaded together to make the final sequence
-    f_seqs = {
-    "scaff_1" : ["UGGAAUGUAA,AGAAGUAUGUAU"],
-    "scaff_2" : "UGGAAUGUAA-AGAAGUAUGUAU",
-    "scaff_3" : "UUAAUGCUAA-UCGUGAUAGGGGU",
-    "scaff_4" : "UAAGGCACGC-GGUGAAUGCCAA",
-    "scaff_5" : "UGAGGUAGUA-GGUUGUAUAGUU",
-	}
-	return f_seqs
-
-
-def GetLinkerSeqs():
-    l_seqs = {
-    "link_1" : ['AAU', 'UAU', 'AUU', 'UUA'],
-    "link_2" : "UGGAAUGUAAAGAAGUAUGUAU",
-    "link_3" : "UUAAUGCUAAUCGUGAUAGGGGU",
-    "link_4" : "UAAGGCACGCGGUGAAUGCCAA",
-    "link_5" : "UGAGGUAGUAGGUUGUAUAGUU",
-	}
 
 def GetdG_dotbracket(seq):
     output_ = subprocess.check_output('echo \'' + seq +'\' | RNAfold -d 0', shell=True).split('\n')
@@ -52,10 +31,10 @@ def GetdG_dotbracket(seq):
     return dG, dotbracket
 
 def Get_MS2():
-    MS2_seq = ''
+    MS2_seq = 'ACATGAGGATCACCCATGT'
     return MS2_seq
 
-def GenerateRandomScaffAndLinker():
+def GenerateRandomScaffAndLinker(n):
     per_AU_scaff = 0.65
     per_AU_linker = 0.85 
     len_scaff = 10
@@ -64,24 +43,41 @@ def GenerateRandomScaffAndLinker():
     srand = Walkerrandom( Scaffprob.values(), Scaffprob.keys() )
     Linkprob = dict( A=per_AU_linker/2, U=per_AU_linker/2, C=(1-per_AU_linker)/2, G=(1-per_AU_linker)/2 )
     lrand = Walkerrandom( Linkprob.values(), Linkprob.keys())
-    numhits = 10
+    numhits = 0
+    contexts_final = defaultdict()
+    seqsfilter = GetMotifstoFilter()
     def makeSeqwProb(l,wrand):
         s = ''
         for i in range(0,l):
             s = s + wrand.random()
         return s
-    seqs_final = defaultdict()
-    while numhits < 10:
+    
+    while numhits < n:
         l1 = makeSeqwProb(len_linker, lrand)
         l2 = makeSeqwProb(len_linker, lrand)
         l3 = makeSeqwProb(len_linker, lrand)
         l4 = makeSeqwProb(len_linker, lrand)
         s1 = makeSeqwProb(len_scaff, srand)
         s2 = makeSeqwProb(len_scaff, srand)
-        seq_final =  l1+s1 + l2 + l3 + s2 + l4 
-        dG, dotbracket = GetdG_dotbracket(seq_final)
-        if (dG > -0.1) and ('(' not in dotbracket):
+        MS2 = Get_MS2()
+        seq_final =  l1+MS2 + l2 +s1 + s2 + l3 + MS2 + l4 
+        dG, db = GetdG_dotbracket(seq_final)
+        constrain = db[0:3] + db[11:15] + db[22:25] + db[-3:] + db[-26:-22] + db[-14:-10]
+        constrain = db[0:3] + db[11:15] + db[-3:] + db[-14:-10]
+        # print(dG,dotbracket)
+        # print(db)
+        if (dG > -14.8) and ('(' not in constrain) and (')' not in constrain) and not any(motif in seq_final  for motif in seqsfilter):
             print(seq_final)
-            print(dG, dotbracket)
+            print(dG, db)
             numhits = numhits + 1
+            contexts_final['c' + str(numhits)] = [l1,l2, MS2, s1, s2, MS2, l3, l4]
+    return contexts_final
+
+def main():
+    n=10
+    c_final = GenerateRandomScaffAndLinker(n)
+
+if __name__ == "__main__":
+    main()
+
 
