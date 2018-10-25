@@ -31,7 +31,7 @@ def GetdG_dotbracket(seq):
     return dG, dotbracket
 
 def Get_MS2():
-    MS2_seq = 'gcgcACATGAGGATCACCCATGTgc'
+    MS2_seq = 'gcgcACATGAGGATCACCCATGTgc' #extended hp
     return MS2_seq
 
 def GenerateRandomScaffAndLinker(n):
