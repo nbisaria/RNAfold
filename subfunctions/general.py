@@ -45,52 +45,36 @@ def Get_PP7():
     print(dG, dotbracket, PP7)
     return PP7
 
-def GenerateRandomScaffAndLinker(n):
-    per_AU_scaff = 0.65
-    per_AU_linker = 0.85 
-    len_scaff = 10
-    len_linker = 2
-    Scaffprob = dict( A=per_AU_scaff/2, U=per_AU_scaff/2, C=(1-per_AU_scaff)/2, G=(1-per_AU_scaff)/2 )
-    srand = Walkerrandom( Scaffprob.values(), Scaffprob.keys() )
-    Linkprob = dict( A=per_AU_linker/2, U=per_AU_linker/2, C=(1-per_AU_linker)/2, G=(1-per_AU_linker)/2 )
-    lrand = Walkerrandom( Linkprob.values(), Linkprob.keys())
-    numhits = 0
-    contexts_final = defaultdict()
-    seqsfilter = GetMotifstoFilter()
-    def makeSeqwProb(l,wrand):
-        s = ''
-        for i in range(0,l):
-            s = s + wrand.random()
-        return s
-    MS2 = Get_MS2()
-    PP7 = Get_PP7()
-    db_final = '....(((((((.((((......)))))))))))..........................(((((((.((....)))))))))..'
-    while numhits < n:
-        l1 = makeSeqwProb(len_linker, lrand)
-        l2 = makeSeqwProb(len_linker, lrand)
-        l3 = makeSeqwProb(len_linker, lrand)
-        l4 = makeSeqwProb(len_linker, lrand)
-        s1 = makeSeqwProb(len_scaff, srand)
-        s2 = makeSeqwProb(len_scaff, srand)
+def get_rc(seq,rna=False):
+    """Gives the reverse complementary seqence of DNA.
 
-        seq_final =  l1+PP7 + l2 +s1 + s2 + l3 + MS2 + l4 
-        dG, db = GetdG_dotbracket(seq_final)
-        constrain = db[0:3] + db[11:15] + db[22:25] + db[-3:] + db[-26:-22] + db[-14:-10]
-        constrain = db[0:3] + db[11:15] + db[-3:] + db[-14:-10]
-        # print(dG,db)
-        # print(db)
-        if (dG > -21) and (db == db_final) and not any(motif in seq_final  for motif in seqsfilter):
-            print(seq_final)
-            print(dG, db)
-            numhits = numhits + 1
-            contexts_final['c' + str(numhits)] = [l1,PP7, l2, s1, s2, l3, MS2, l4]
-    return contexts_final
+        Args:
+            seq: The sequence to be reverse complemented, in either DNA or RNA
+            form.
 
-def main():
-    n=10
-    c_final = GenerateRandomScaffAndLinker(n)
+        Returns:
+            The DNA reverse comlementary sequence.
+    """
+    # Builds dictionary mapping each sequence to its complement.
+    nucleotide_complement_map = {
+    "C" : "G",
+    "G" : "C",
+    "T" : "A",
+    "U" : "A"  
+    }
+    # Assigns A to U or T depending on 'rna' flag.
+    if rna:
+        nucleotide_complement_map["A"] = "U"
+    else:
+        nucleotide_complement_map["A"] = "T"
+    # Constructs a list of the characters substituted and reversed in order.
+    rev_complement_list = [nucleotide_complement_map[i] for i in seq][::-1]
+    rev_complement = "".join(rev_complement_list)
+    return(rev_complement)
 
-if __name__ == "__main__":
-    main()
+def Get_PairedEndPrimersSeqs():
+    # read 5' to 3' 
+    TrueSeqR2 = 'GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT' # Tm 67C
+    TrueSeqR1 = 'GATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT' # Tm 67C
 
-
+    return TrueSeqR2, TrueSeqR1
