@@ -28,8 +28,9 @@ def GenerateRandomScaffAndLinker(n):
         return s
     MS2 = Get_MS2()
     PP7 = Get_PP7()
-    R2, R1 = Get_PairedEndPrimersSeqs()
-    db_final = '....(((((((.((((......)))))))))))..........................(((((((.((....)))))))))..'
+    fivep, threep = GetFlankingseqs()
+    db_final = '......................(((((((.((((......)))))))))))))))))....................(((((((.((....))))))))).......................'
+  
     while numhits < n:
         l1 = makeSeqwProb(len_linker, lrand)
         l2 = makeSeqwProb(len_linker, lrand)
@@ -41,17 +42,22 @@ def GenerateRandomScaffAndLinker(n):
         #'...(((....(((..(((((((((((((((((....)))))))))))).)))))..)))...))).......'
         # this is using the R2 + get_rc(R1)
         # perhaps need to add a constant new sequence + BstX1 sites and use some dark cycles
-        seq_final =  R2 + l1+PP7 + l2 +s1 + s2 + l3 + MS2 + l4 + get_rc(R1)
+
+        # the library itself will have only a subset of R2 (or all of R2 depending on PCR and then we will add BstXI sites using PCR)
+
+        seq_final =  fivep + l1+PP7 + l2 +l3 + MS2 + l4 + threep
+        print(len(seq_final))
         dG, db = GetdG_dotbracket(seq_final)
         # constrain = db[0:3] + db[11:15] + db[22:25] + db[-3:] + db[-26:-22] + db[-14:-10]
         # constrain = db[0:3] + db[11:15] + db[-3:] + db[-14:-10]
         print(dG,db)
         # print(db)
-        if (dG > -21) and (db[len(R2):] == db_final) and not any(motif in seq_final  for motif in seqsfilter):
+        if (dG > -25.6) and not any(motif in seq_final  for motif in seqsfilter):
+        # if (db == db_final) and not any(motif in seq_final  for motif in seqsfilter):
             print(seq_final)
             print(dG, db)
             numhits = numhits + 1
-            contexts_final['c' + str(numhits)] = [l1,PP7, l2, s1, s2, l3, MS2, l4]
+            contexts_final['c' + str(numhits)] = [l1,PP7, l2, l3, MS2, l4]
     return contexts_final
 
 def main():

@@ -26,7 +26,11 @@ class Parameters():
         self.min_deltaG = -12
         self.max_deltaG = -3
         self.tempK = 310
-
+def GetFlankingseqs():
+    fivep = 'CGTGTGCTCTTCCGATCT'
+    threep = 'CGACAGGTTCAGAGTTCTACA'
+    # threep = 'CGACAGGTTCAGTCTTCTAGA'
+    return fivep, threep
 
 def GetdG_dotbracket(seq):
     output_ = subprocess.check_output('echo \'' + seq +'\' | RNAfold -d 0', shell=True).split('\n')
@@ -45,6 +49,15 @@ def Get_PP7():
     print(dG, dotbracket, PP7)
     return PP7
 
+def Get_BstXI():
+    #use to double digest the blackbone and insert (the variant library)
+    #CCANNNNNNTGG
+    #GGTNNNNNNACC
+    fivepsite = 'CCACGCTGATGG'
+    threepsite = 'CCAGGGCATTGG'
+
+    return fivepsite, threepsite
+
 def get_rc(seq,rna=False):
     """Gives the reverse complementary seqence of DNA.
 
@@ -60,7 +73,8 @@ def get_rc(seq,rna=False):
     "C" : "G",
     "G" : "C",
     "T" : "A",
-    "U" : "A"  
+    "U" : "A",
+    'N' : 'N'  
     }
     # Assigns A to U or T depending on 'rna' flag.
     if rna:
@@ -71,10 +85,25 @@ def get_rc(seq,rna=False):
     rev_complement_list = [nucleotide_complement_map[i] for i in seq][::-1]
     rev_complement = "".join(rev_complement_list)
     return(rev_complement)
-
 def Get_PairedEndPrimersSeqs():
     # read 5' to 3' 
-    TrueSeqR2 = 'GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT' # Tm 67C
+    TrueSeqR2 = 'GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT' # Tm 67C (34bp)
     TrueSeqR1 = 'GATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT' # Tm 67C
-
+    
     return TrueSeqR2, TrueSeqR1
+
+# def get3pflank():
+#     #shoot for a Tm of 52C
+#     requiredBstXIseq = 'GCCCAATGCCCTGGCTC'
+# def getRTPCRprimer():
+#     xuebingsRTseq = 'CACGTAGGAAGTACCAGACC' # Tm = 54  (don't understand whether this is 5' to 3' or not but only Tm matters)
+#     seansRTseq =       'CGGGTTACGGGACCGAG' #3' to 5' Tm = 58 This includes a tiny bit of the BstXI site 
+#     requiredBstXIseq = 'CGGGTTACGG'
+#     P7seq = 'CAAGCAGAAGACGGCATACGAGAT' # 5' to 3' 
+#     RTprimer =  #TGTIRT can't have any overhangs so needs to just bind to the sequence
+#     R_PCRprimer = P7seq #not RC of P7seq 
+#     Zubrandt_sub = # use a subset to get a Tm of 60 to do PCR to add extra sequences and BstXI sites
+#     return RTprimer 
+
+# def getforwardPCRprimer():
+#     P5seq = 'AATGATACGGCGACCACCGA' #5' to 3'
