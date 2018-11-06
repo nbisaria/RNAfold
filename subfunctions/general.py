@@ -16,7 +16,9 @@ from collections import defaultdict
 def GetMotifstoFilter():
     splicesites = ['GGUAAGU']
     polyA = ['AAUAA']
-    seqs = splicesites + polyA
+    RBPsites = ['UUGCAC','GCUUGC','GCGUG','GCAUG','UUGCAC','CUUUCU','CUUUCC'] #from Spitale 2015: sites that show the highest
+    #SHAPE deviations between in vitro/in vivo and that correspond to known RBP sites 
+    seqs = splicesites + polyA + RBPsites
     return seqs
 
 class Parameters():
